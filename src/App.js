@@ -29,10 +29,11 @@ function App() {
     );
     const script = document.createElement("script");
     script.type = "text/javascript";
+    script.id = "script";
     script.src = scriptUrl;
     const iframeHead =
       window.frames.code.document.getElementsByTagName("head")[0];
-    iframeHead.textContent = "";
+    window.frames.code.document.getElementById("script").outerHTML = "";
     iframeHead.appendChild(script);
   };
 
