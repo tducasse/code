@@ -7,12 +7,17 @@ import Toast from "./Toast";
 
 function App() {
   const [code, setCode] = useState("");
+  const [tests, setTests] = useState("");
   const [successToast, setSuccessToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
+  const [codeTab, setCodeTab] = useState("code");
+  const [consoleTab, setConsoleTab] = useState("code");
 
   const { peerId, connect, broadcast } = usePeers({
     setCode,
     code,
+    setTests,
+    tests,
   });
 
   useEffect(() => {
@@ -27,6 +32,11 @@ function App() {
     broadcast({ code: val });
   };
 
+  const updateTests = (val) => {
+    setTests(val);
+    broadcast({ tests: val });
+  };
+
   const copyLink = async () => {
     const link = `${window.location.origin}/${peerId}`;
     try {
@@ -37,6 +47,15 @@ function App() {
       setErrorToast(true);
       setTimeout(() => setErrorToast(false), 1500);
     }
+  };
+
+  const switchTo = (tab) => () => setCodeTab(tab);
+  const switchConsoleTo = (tab) => () => setConsoleTab(tab);
+
+  const onClick = (type) => () => {
+    switchConsoleTo(type)();
+    switchTo(type)();
+    run({ tests, code, iframe: type });
   };
 
   return (
@@ -50,10 +69,17 @@ function App() {
           <div className="flex flex-1 flex-row gap-2 items-center">
             <button
               className="px-4 py-2 text-white font-bold bg-green-500 hover:bg-green-700 rounded"
-              onClick={() => run(code)}
+              onClick={onClick("code")}
               type="button"
             >
               Run
+            </button>
+            <button
+              className="px-4 py-2 text-white font-bold bg-blue-500 hover:bg-blue-700 rounded"
+              onClick={onClick("tests")}
+              type="button"
+            >
+              Run tests
             </button>
           </div>
           <button
@@ -72,12 +98,93 @@ function App() {
           </button>
           <div />
         </div>
+        <div className="flex flex-row justify-between">
+          <ul className="list-reset flex">
+            <li className="-mb-px mr-1">
+              <button
+                type="button"
+                onClick={switchTo("code")}
+                className={`px-4 py-2 ${
+                  codeTab === "code"
+                    ? "font-semibold text-blue-500"
+                    : "text-gray-500"
+                }`}
+              >
+                Code
+              </button>
+            </li>
+            <li className="mr-1">
+              <button
+                type="button"
+                onClick={switchTo("tests")}
+                className={`px-4 py-2 ${
+                  codeTab === "tests"
+                    ? "font-semibold text-blue-500"
+                    : "text-gray-500"
+                }`}
+              >
+                Tests
+              </button>
+            </li>
+          </ul>
+          <ul className="list-reset flex">
+            <li className="-mb-px mr-1">
+              <button
+                type="button"
+                onClick={switchConsoleTo("code")}
+                className={`px-4 py-2 ${
+                  consoleTab === "code"
+                    ? "font-semibold text-blue-500"
+                    : "text-gray-500"
+                }`}
+              >
+                Code
+              </button>
+            </li>
+            <li className="mr-1">
+              <button
+                type="button"
+                onClick={switchConsoleTo("tests")}
+                className={`px-4 py-2 ${
+                  consoleTab === "tests"
+                    ? "font-semibold text-blue-500"
+                    : "text-gray-500"
+                }`}
+              >
+                Tests
+              </button>
+            </li>
+          </ul>
+        </div>
         <div className="flex flex-row h-full overflow-hidden">
           <div className="flex-1">
-            <Editor onChange={updateCode} value={code} />
+            <Editor
+              onChange={updateCode}
+              value={code}
+              className={codeTab === "code" ? "" : "hidden"}
+            />
+            <Editor
+              onChange={updateTests}
+              value={tests}
+              className={codeTab === "tests" ? "" : "hidden"}
+            />
           </div>
-          <div className="flex-1 bg-gray-700">
-            <Console source={window.frames.code} />
+          <div className="flex-1 h-full bg-gray-700">
+            <Console
+              iframe="code"
+              className={consoleTab === "code" ? "" : "hidden"}
+            />
+            <iframe
+              name="tests"
+              id="tests"
+              title="Tests"
+              src="tests.html"
+              sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+              className={`h-full w-full ${
+                consoleTab === "tests" ? "" : "hidden"
+              }`}
+              style={{ background: "#222" }}
+            />
           </div>
         </div>
       </div>

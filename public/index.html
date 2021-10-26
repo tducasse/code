@@ -28,11 +28,18 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  <script>
+    window.onload = function () {
+      window.ready = true
+      window.setReady = function () {
+        window.ready = true;
+      }
+      document.getElementById('code').addEventListener('load', window.setReady, true)
+      document.getElementById('tests').addEventListener('load', window.setReady, true)
+    }
+  </script>
   <iframe name="code" id="code" style="display: none"
-    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts" srcdoc="
-      <script id='script'></script>
-    ">
-
+    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts" src="code.html">
   </iframe>
   <!--
       This HTML file is a template.

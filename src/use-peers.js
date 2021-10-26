@@ -1,7 +1,7 @@
 import Peer from "peerjs";
 import { useCallback, useEffect, useState } from "react";
 
-const usePeers = ({ setCode, code }) => {
+const usePeers = ({ setCode, code, setTests, tests }) => {
   const [peer, setPeer] = useState();
   const [peerId, setPeerId] = useState("");
   const [connections, setConnections] = useState([]);
@@ -30,6 +30,8 @@ const usePeers = ({ setCode, code }) => {
               });
             } else if (data.code) {
               setCode(data.code);
+            } else if (data.tests) {
+              setTests(data.tests);
             }
           });
         });
@@ -41,7 +43,7 @@ const usePeers = ({ setCode, code }) => {
         });
       }
     },
-    [peer, peerId, setCode]
+    [peer, peerId, setCode, setTests]
   );
 
   const sendPeers = (conn, peers) => {
@@ -73,16 +75,19 @@ const usePeers = ({ setCode, code }) => {
           conn.on("data", (data) => {
             if (data.code) {
               setCode(data.code);
+            } else if (data.tests) {
+              setTests(data.tests);
             }
           });
           conn.on("open", () => {
             sendPeers(conn, peers);
+            conn.send({ tests });
             conn.send({ code });
           });
         }
       });
     }
-  }, [connections, peer, peerId, code, setCode]);
+  }, [connections, peer, peerId, code, setCode, setTests, tests]);
 
   return {
     broadcast,
